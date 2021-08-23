@@ -8,7 +8,7 @@ from discord.ext import commands,tasks
 
 from ytdl import YTDLSource
 from game import Game
-import generate
+import strings
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
@@ -20,99 +20,135 @@ game = None
 
 @bot.event
 async def on_ready():
-	print(f'{bot.user.name} has connected to Discord!')
+    print(f'{bot.user.name} has connected to Discord!')
 
 @bot.command(name='play', help='To play song')
 async def play(ctx, *, url):
-	global game
+    global game
 
-	if ctx.voice_client is None:
-		if ctx.author.voice:
-			await ctx.author.voice.channel.connect()
-		else:
-			await ctx.send("You are not connected to a voice channel.")
-			raise commands.CommandError("Author not connected to a voice channel.")
+    print('hi')
 
-	game = Game(url)
-	game.start(bot.loop.create_task(game_handler(ctx)))
+    if ctx.voice_client is None:
+        if ctx.author.voice:
+            await ctx.author.voice.channel.connect()
+        else:
+            await ctx.send("You are not connected to a voice channel.")
+            raise commands.CommandError("Author not connected to a voice channel.")
+
+    game = Game(url)
+    game.start(bot.loop.create_task(game_handler(ctx)))
 
 @bot.command(name='end', help='To end game')
 async def end(ctx):
-	global game
+    global game
 
-	if not game:
-		await ctx.send('No game in progress.')
-		return
+    if not game:
+        await ctx.send('No game in progress.')
+        return
 
-	server = ctx.message.guild
-	voice_channel = server.voice_client
-	await voice_channel.disconnect()
+    server = ctx.message.guild
+    voice_channel = server.voice_client
+    await voice_channel.disconnect()
 
-	scores = [f'@{p} {s}' for p, s in game.get_scoreboard()]
-	desc = '\n'.join(scores)
-	game = None
+    end_message = strings.round_message(game.round_info, game.scoreboard_string())
+    await ctx.send(embed=end_message)
 
-	end_message = discord.Embed(
-		title='Game Summary',
-		description=desc,
-		color=discord.Color.red()
-	)
+    game.pause()
+    game = None
 
-	await ctx.send(embed=end_message)
+@bot.command(name='pause', help='To pause the game')
+async def pause(ctx):
+    message = 'No game in progress.'
+    if game:
+        if game.in_progress:
+            message = 'Game paused.'
+            server = ctx.message.guild
+            voice_channel = server.voice_client
+            voice_channel.stop()
+            game.pause()
+        else:
+            message = 'Game is not in progress.'
+
+    await ctx.send(message)
+
+@bot.command(name='resume', help='To resume the game')
+async def resume(ctx):
+    message = 'No game in progress.'
+    if game:
+        if game.in_progress:
+            message = 'Game is already in progress'
+        else:
+            message = 'Game resumed.'
+            game.start(bot.loop.create_task(game_handler(ctx)))
+
+    await ctx.send(message)
+
+@bot.command(name='skip', help='To skip round')
+async def skip(ctx):
+    message = 'No game in progress.'
+    if game:
+        if game.in_progress:
+            message = 'Song skipped.'
+            game.skip()
+        else:
+            message = 'Round has not started.'
+
+    await ctx.send(message)
 
 @bot.event
 async def on_message(message):
-	if message.author == bot.user:
-		return
-	# await message.channel.send('hi' + message.author.mention)
+    if message.author == bot.user:
+        return
 
-	if game and game.in_progress:
-		if game.check(message.author, message.content):
-			round_info = game.round_info
-			if not game.score(message.author):
-				score_message = discord.Embed()
+    if game and game.in_progress:
+        if game.check(message.author, message.content):
+            round_info = game.round_info
+            if not game.score(message.author):
+                score_message = discord.Embed()
 
-				targets = round_info['targets']
-				for target in targets:
-					data = targets[target]
-					if data['guessed_by']:
-						score_message.add_field(name=data['type'], value=f"{data['print']} guessed by {data['guessed_by'].mention}")
-					else:
-						score_message.add_field(name=data['type'], value='???')
-				await message.channel.send(embed=score_message)
-			else:
-				round_message = generate.round_message(round_info, game.scoreboard_string())
-				await message.channel.send(embed=round_message)
+                targets = round_info['targets']
+                for target in targets:
+                    data = targets[target]
+                    if data['guessed_by']:
+                        score_message.add_field(name=data['type'], value=f"{data['print']} guessed by {data['guessed_by'].mention}")
+                    else:
+                        score_message.add_field(name=data['type'], value='???')
+                await message.channel.send(embed=score_message)
+            else:
+                game.skip()
 
-				game.skip()
+    print(f'{message.author.name} : {message.content} : {strings.normalise(message.content)}')
 
-		print(message.author.name, message.content, Game.normalise(message.content))
-
-	await bot.process_commands(message)
+    await bot.process_commands(message)
 
 async def game_handler(ctx):
-	server = ctx.message.guild
-	voice_channel = server.voice_client
+    server = ctx.message.guild
+    voice_channel = server.voice_client
 
-	while game.in_progress:
-		voice_channel.stop()
-		await asyncio.sleep(3)
+    while game.in_progress:
+        game.in_progress = False
+        voice_channel.stop()
+        await asyncio.sleep(3)
 
-		game.new_round()
-		round_info = game.round_info
+        round_info = game.round_info
+        async with ctx.typing():
+            player = await YTDLSource.from_url(round_info['search_string'], loop=bot.loop, stream=True)
+            voice_channel.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
 
-		async with ctx.typing():
-			player = await YTDLSource.from_url(round_info['search string'], loop=bot.loop, stream=True)
-			voice_channel.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
+        message = discord.Embed()
+        targets = round_info['targets']
+        for target in targets:
+            message.add_field(name=targets[target]['type'], value='???')
 
-		message = discord.Embed()
-		targets = round_info['targets']
-		for target in targets:
-			message.add_field(name=targets[target]['type'], value='???')
+        await ctx.send(embed=message)
+        print(player.title)
 
-		await ctx.send(embed=message)
-		print(player.title)
+        game.in_progress = True
+        await asyncio.sleep(30)
 
-		await asyncio.sleep(30)
+        round_message = strings.round_message(round_info, game.scoreboard_string())
+        await ctx.send(embed=round_message)
+
+        game.new_round()
 
 bot.run(TOKEN)

@@ -1,5 +1,5 @@
 import re
-import string
+import strings
 
 from spotify import Spotify
 
@@ -9,29 +9,34 @@ class Game:
         self.points_to_win = points_to_win
         self.playlist = Spotify.create_playlist_from_url(url)[:rounds]
         self.scoreboard = {}
-        self.round_info = None
+        self.round_info = {'round_no': 0}
         self.task = None
 
     def start(self, task):
         self.in_progress = True
         self.task = task
+        self.new_round()
 
     def pause(self):
         self.in_progress = False
+        self.round_info['round_no'] = self.round_info.get('round_no', 0) - 1
+        self.task.cancel()
+        self.task = None
 
     def skip(self):
         self.task._fut_waiter.set_result(None)
         self.task._fut_waiter.cancel()
 
     def new_round(self):
-        song = self.playlist.pop(-1)
-        round_info = {
-            'search string': f"{song['artists'][0]} {song['name']} audio",
+        round_no = self.round_info['round_no']
+        song = self.playlist[round_no]
+        self.round_info = {
+            'round_no': round_no + 1,
+            'search_string': f"{song['artists'][0]} {song['name']} audio",
             'thumbnail': song['thumbnail'],
             'targets': Game.create_targets(song)
         }
-        print(round_info)
-        self.round_info = round_info
+        print(self.round_info)
 
     def scoreboard_string(self):
         leaderboard = {}
@@ -44,7 +49,7 @@ class Game:
 
     def check(self, player, guess):
         targets = self.round_info['targets']
-        guess = Game.normalise(guess)
+        guess = strings.normalise(guess)
         if guess in targets and not targets[guess]['guessed_by']:
             targets[guess]['guessed_by'] = player
             return True
@@ -61,29 +66,19 @@ class Game:
             return True
         return False
 
-
     @staticmethod
     def create_targets(song):
         targets = {
-            Game.normalise(song['name']): {
+            strings.normalise(song['name'], True): {
                 'type': 'Song',
-                'print': song['name'],
+                'print':  strings.hide_details(song['name']),
                 'guessed_by': None
             }
         }
         for artist in song['artists']:
-            targets[Game.normalise(artist)] = {
+            targets[strings.normalise(artist, True)] = {
                 'type': 'Artist',
-                'print': artist,
+                'print': strings.hide_details(artist),
                 'guessed_by': None
             }
         return targets
-
-    @staticmethod
-    def normalise(s):
-        s = s.lower()
-        s = re.sub(r'\(.+\)', '', s)
-        s = re.sub(r'&', 'and', s)
-        s = s.translate(str.maketrans('', '', string.punctuation))
-        s = s.strip()
-        return s
