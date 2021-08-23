@@ -9,9 +9,9 @@ def round_message(round_info, scoreboard):
         line = f"**{data['type']}**: {data['print']}"
         if data['guessed_by']:
             line += f" guessed by {data['guessed_by'].mention}"
-        line = line.ljust(50)
         desc.append(line)
     desc = '\n'.join(desc)
+
     message = discord.Embed(
         title=f"Round {round_info['round_no']} - Summary",
         description=desc,
@@ -19,6 +19,17 @@ def round_message(round_info, scoreboard):
     )
     message.set_thumbnail(url=round_info['thumbnail'])
     message.add_field(name='Leaderboard', value=scoreboard if scoreboard else 'No scores yet.')
+
+    return message
+
+def guess_message(round_info):
+    message = discord.Embed()
+    for target in round_info['targets']:
+        data = round_info['targets'][target]
+        if data['guessed_by']:
+            message.add_field(name=data['type'], value=f"{data['print']} - guessed by {data['guessed_by'].mention}")
+        else:
+            message.add_field(name=data['type'], value='???')
     return message
 
 def normalise(s, target=False):

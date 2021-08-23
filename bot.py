@@ -102,18 +102,8 @@ async def on_message(message):
 
     if game and game.in_progress:
         if game.check(message.author, message.content):
-            round_info = game.round_info
             if not game.score(message.author):
-                score_message = discord.Embed()
-
-                targets = round_info['targets']
-                for target in targets:
-                    data = targets[target]
-                    if data['guessed_by']:
-                        score_message.add_field(name=data['type'], value=f"{data['print']} guessed by {data['guessed_by'].mention}")
-                    else:
-                        score_message.add_field(name=data['type'], value='???')
-                await message.channel.send(embed=score_message)
+                await message.channel.send(embed=strings.guess_message(game.round_info))
             else:
                 game.skip()
 
@@ -135,20 +125,13 @@ async def game_handler(ctx):
             player = await YTDLSource.from_url(round_info['search_string'], loop=bot.loop, stream=True)
             voice_channel.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
 
-        message = discord.Embed()
-        targets = round_info['targets']
-        for target in targets:
-            message.add_field(name=targets[target]['type'], value='???')
-
-        await ctx.send(embed=message)
+        await ctx.send(embed=strings.guess_message(round_info))
         print(player.title)
 
         game.in_progress = True
         await asyncio.sleep(30)
 
-        round_message = strings.round_message(round_info, game.scoreboard_string())
-        await ctx.send(embed=round_message)
-
+        await ctx.send(embed=strings.round_message(round_info, game.scoreboard_string()))
         game.new_round()
 
 bot.run(TOKEN)
