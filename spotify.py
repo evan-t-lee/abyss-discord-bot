@@ -21,13 +21,17 @@ class Spotify:
 			raise Exception
 
 	@staticmethod
-	def generate_playlist_from_url(url):
+	def create_playlist_from_url(url):
 		sp_playlist = sp.playlist_items(Spotify.parse_link(url))
 		playlist = []
 		for item in sp_playlist['items']:
 			track = item['track']
 			formated_artists = [artist['name'] for artist in track['artists']]
-			formatted_track = {'name': track['name'], 'artists': formated_artists}
+			formatted_track = {
+				'name': track['name'],
+				'artists': formated_artists,
+				'thumbnail': track['album']['images'][0]['url']
+			}
 			playlist.append(formatted_track)
 		shuffle(playlist)
 		return playlist
