@@ -26,11 +26,12 @@ class Spotify:
 		playlist = []
 		for item in sp_playlist['items']:
 			track = item['track']
+			# print(track['name'], track['album']['images'])
 			formated_artists = [artist['name'] for artist in track['artists']]
 			formatted_track = {
 				'name': track['name'],
 				'artists': formated_artists,
-				'thumbnail': track['album']['images'][0]['url']
+				'thumbnail': track['album']['images'][0]['url'] if track['album']['images'] else ''
 			}
 			playlist.append(formatted_track)
 		shuffle(playlist)

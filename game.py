@@ -4,7 +4,7 @@ import strings
 from spotify import Spotify
 
 class Game:
-    def __init__(self, url, points_to_win=10, rounds=25):
+    def __init__(self, url, points_to_win, rounds):
         self.in_progress = False
         self.points_to_win = points_to_win
         self.playlist = Spotify.create_playlist_from_url(url)[:rounds]

@@ -4,7 +4,8 @@ from dotenv import load_dotenv
 
 import asyncio
 import discord
-from discord.ext import commands,tasks
+from discord_slash import SlashCommand
+from discord_slash.utils.manage_commands import create_option
 
 from ytdl import YTDLSource
 from game import Game
@@ -14,7 +15,8 @@ load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
 intents = discord.Intents().all()
-bot = commands.Bot(command_prefix='!', intents=intents)
+bot = discord.ext.commands.Bot(command_prefix='!', intents=intents)
+slash = SlashCommand(bot, sync_commands=True)
 
 game = None
 
@@ -22,11 +24,34 @@ game = None
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
 
-@bot.command(name='play', help='To play song')
-async def play(ctx, *, url):
+@slash.slash(
+    name='play',
+    description='Start a game of guess the song.',
+    options=[
+        create_option(
+            name='playlist_link',
+            option_type=3,
+            description='The spotify playlist link to use for game.',
+            required=True
+        ),
+        create_option(
+            name='points_to_win',
+            option_type=4,
+            description='The amount of points needed to win.',
+            required=False
+        ),
+        create_option(
+            name='rounds',
+            option_type=4,
+            description='The total number of rounds in the game.',
+            required=False
+        )
+    ]
+)
+async def play(ctx, playlist_link, points_to_win=10, rounds=25):
     global game
 
-    print('hi')
+    print(points_to_win, rounds)
 
     if ctx.voice_client is None:
         if ctx.author.voice:
@@ -35,10 +60,12 @@ async def play(ctx, *, url):
             await ctx.send("You are not connected to a voice channel.")
             raise commands.CommandError("Author not connected to a voice channel.")
 
-    game = Game(url)
+    game = Game(playlist_link, points_to_win, rounds)
     game.start(bot.loop.create_task(game_handler(ctx)))
+    await ctx.send('Yeet :P', hidden=True)
+    await ctx.channel.send('Game started!')
 
-@bot.command(name='end', help='To end game')
+@slash.slash(name='end',description='To end the game.')
 async def end(ctx):
     global game
 
@@ -56,7 +83,7 @@ async def end(ctx):
     game.pause()
     game = None
 
-@bot.command(name='pause', help='To pause the game')
+@slash.slash(name='pause', description='To pause the game.')
 async def pause(ctx):
     message = 'No game in progress.'
     if game:
@@ -71,7 +98,7 @@ async def pause(ctx):
 
     await ctx.send(message)
 
-@bot.command(name='resume', help='To resume the game')
+@slash.slash(name='resume', description='To resume the game.')
 async def resume(ctx):
     message = 'No game in progress.'
     if game:
@@ -83,7 +110,7 @@ async def resume(ctx):
 
     await ctx.send(message)
 
-@bot.command(name='skip', help='To skip round')
+@slash.slash(name='skip', description='To skip round.')
 async def skip(ctx):
     message = 'No game in progress.'
     if game:
@@ -112,7 +139,7 @@ async def on_message(message):
     await bot.process_commands(message)
 
 async def game_handler(ctx):
-    server = ctx.message.guild
+    server = ctx.guild
     voice_channel = server.voice_client
 
     while game.in_progress:
@@ -121,17 +148,17 @@ async def game_handler(ctx):
         await asyncio.sleep(3)
 
         round_info = game.round_info
-        async with ctx.typing():
+        async with ctx.channel.typing():
             player = await YTDLSource.from_url(round_info['search_string'], loop=bot.loop, stream=True)
             voice_channel.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
 
-        await ctx.send(embed=strings.guess_message(round_info))
+        await ctx.channel.send(embed=strings.guess_message(round_info))
         print(player.title)
 
         game.in_progress = True
         await asyncio.sleep(30)
 
-        await ctx.send(embed=strings.round_message(round_info, game.scoreboard_string()))
+        await ctx.channel.send(embed=strings.round_message(round_info, game.scoreboard_string()))
         game.new_round()
 
 bot.run(TOKEN)
