@@ -29,7 +29,7 @@ class Game:
         self.round_info = {
             'round_no': round_no + 1,
             'skipped': False,
-            'search_string': f"{song['artists'][0]} {song['name']}",
+            'search_string': f"{song['name']} {song['artists'][0]} ",
             'thumbnail': song['thumbnail'],
             'targets': Game.create_targets(song)
         }

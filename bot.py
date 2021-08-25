@@ -82,8 +82,8 @@ async def end(ctx):
     await voice_channel.disconnect()
 
     game.in_progress = False
-    game.new_round()
-    await ctx.send(embed=discord.Embed(title='Game Forcibily Ended'), hidden=True)
+    game.end_round(skipped=True)
+    await ctx.send(embed=discord.Embed(title='Game Forcibily Ended'))
 
 @slash.slash(name='pause', description='To pause the game.')
 async def pause(ctx):
@@ -166,6 +166,7 @@ async def game_handler(ctx):
         await ctx.channel.send(embed=strings.round_message(round_info, game.leaderboard()))
         game.new_round()
 
+    print('yeet')
     end_message = strings.end_message(game.playlist_info, game.leaderboard())
     await ctx.channel.send(embed=end_message)
     game = None

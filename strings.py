@@ -14,16 +14,6 @@ def create_message(title, desc, color=discord.Embed.Empty):
 def create_error(desc):
     return create_message('Error', desc, discord.Color.red())
 
-def create_desc(round_info):
-    desc = ''
-    for target in round_info['targets']:
-        data = round_info['targets'][target]
-        line = f"**{data['type']}** : {data['print']}"
-        if data['guessed_by']:
-            line += f" - guessed by {data['guessed_by'].mention}"
-        desc += f'{line}\n'
-    return desc + '\u200B'
-
 def start_message(playlist_info, points_to_win, rounds):
     desc = f"**Playlist** : {playlist_info['name']}\n"
     desc += f'**Rounds** : {rounds}\n\u200B'
@@ -39,7 +29,16 @@ def start_message(playlist_info, points_to_win, rounds):
 def round_message(round_info, scoreboard):
     print(round_info)
     title = f"Round {round_info['round_no']} - Summary"
-    desc = create_desc(round_info)
+    desc = ''
+    targets = round_info['targets']
+    for i, target in enumerate(targets):
+        data = targets[target]
+        no = f' {i} ' if len(targets) > 2 and i > 0 else ' '
+        line = f"**{data['type']}{no}**: {data['print']}"
+        if data['guessed_by']:
+            line += f" - guessed by {data['guessed_by'].mention}"
+        desc += f'{line}\n'
+    desc += '\u200B'
     color = discord.Color.green()
 
     if round_info['skipped']:
@@ -55,13 +54,11 @@ def round_message(round_info, scoreboard):
 
 def end_message(playlist_info, scoreboard):
     desc = f"**Playlist** : {playlist_info['name']}"
-    title = f'Game Summary'
+    title = f'Game Finished!'
     message = create_message(title, desc, discord.Color.blue())
     message.set_thumbnail(url=playlist_info['thumbnail'])
     value = scoreboard if scoreboard else 'No scores yet.'
     message.add_field(name='Leaderboard', value=value, inline=False)
-    print(message)
-
     return message
 
 def guess_message(round_info):
