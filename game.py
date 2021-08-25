@@ -4,10 +4,10 @@ import strings
 from spotify import Spotify
 
 class Game:
-    def __init__(self, url, points_to_win=10, rounds=25):
+    def __init__(self, url, points_to_win, rounds):
         self.in_progress = False
         self.points_to_win = points_to_win
-        self.playlist = Spotify.create_playlist_from_url(url)[:rounds]
+        self.playlist_info, self.playlist  = Spotify.get_playlist(url)[:rounds]
         self.scoreboard = {}
         self.round_info = {'round_no': 0}
         self.task = None
@@ -17,28 +17,31 @@ class Game:
         self.task = task
         self.new_round()
 
-    def pause(self):
+    def suspend(self):
         self.in_progress = False
         self.round_info['round_no'] = self.round_info.get('round_no', 0) - 1
         self.task.cancel()
         self.task = None
-
-    def skip(self):
-        self.task._fut_waiter.set_result(None)
-        self.task._fut_waiter.cancel()
 
     def new_round(self):
         round_no = self.round_info['round_no']
         song = self.playlist[round_no]
         self.round_info = {
             'round_no': round_no + 1,
-            'search_string': f"{song['artists'][0]} {song['name']} audio",
+            'skipped': False,
+            'search_string': f"{song['artists'][0]} {song['name']}",
             'thumbnail': song['thumbnail'],
             'targets': Game.create_targets(song)
         }
         print(self.round_info)
 
-    def scoreboard_string(self):
+    def end_round(self, skipped=False):
+        if skipped:
+            self.round_info['skipped'] = True
+        self.task._fut_waiter.set_result(None)
+        self.task._fut_waiter.cancel()
+
+    def leaderboard(self):
         leaderboard = {}
         for p, s in self.scoreboard.items():
             leaderboard[s] = leaderboard.get(s, []) + [p.mention]
@@ -60,6 +63,7 @@ class Game:
 
         if self.scoreboard[player] == self.points_to_win:
             self.in_progress = False
+            return True
 
         targets = self.round_info['targets']
         if all([target['guessed_by'] for target in targets.values()]):

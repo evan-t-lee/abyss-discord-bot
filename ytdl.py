@@ -1,5 +1,8 @@
 import discord
 import youtube_dl
+from ytmusicapi import YTMusic
+
+ytm = YTMusic()
 
 # YTDL constatnts
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -32,8 +35,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.url = data.get('url')
 
     @classmethod
-    async def from_url(cls, url, *, loop=None, stream=False):
+    async def from_url(cls, search_string, *, loop=None, stream=False):
         loop = loop or asyncio.get_event_loop()
+        link = ytm.search(search_string, "songs")
+        url = f"https://youtu.be/{link[0]['videoId']}" if link else f'{search_string} audio'
+        print(url)
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
 
         if 'entries' in data:
