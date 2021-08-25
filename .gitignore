@@ -2,3 +2,4 @@
 !*.py
 !.gitignore
 !Procfile
+!requirements.txt
