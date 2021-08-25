@@ -22,3 +22,4 @@ websocket-client==1.2.1
 yarl==1.6.3
 youtube-dl==2021.6.6
 ytmusicapi==0.19.1
+ffmpeg
