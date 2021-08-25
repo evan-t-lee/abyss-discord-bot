@@ -3,7 +3,13 @@ import re
 import string
 from unidecode import unidecode
 
-def create_message(title, desc, color=discord.Embed.Empty):
+# CONSTANTS
+EMPTY = discord.Embed.Empty
+SPACE = '\u200B'
+
+PAUSE_MESSAGE = '**Game Paused** : Type */resume* to unpause game.'
+
+def create_message(title=EMPTY, desc=EMPTY, color=EMPTY):
     message = discord.Embed(
         title=title,
         description=desc,
@@ -12,11 +18,11 @@ def create_message(title, desc, color=discord.Embed.Empty):
     return message
 
 def create_error(desc):
-    return create_message('Error', desc, discord.Color.red())
+    return create_message(EMPTY, f'**Error** : {desc}', discord.Color.red())
 
 def start_message(playlist_info, points_to_win, rounds):
     desc = f"**Playlist** : {playlist_info['name']}\n"
-    desc += f'**Rounds** : {rounds}\n\u200B'
+    desc += f'**Rounds** : {rounds}\n{SPACE}'
     message = discord.Embed(
         title='Starting a game!',
         description=desc,
@@ -38,12 +44,12 @@ def round_message(round_info, scoreboard):
         if data['guessed_by']:
             line += f" - guessed by {data['guessed_by'].mention}"
         desc += f'{line}\n'
-    desc += '\u200B'
+    desc += SPACE
     color = discord.Color.green()
 
     if round_info['skipped']:
         title += ' (Skipped)'
-        color = discord.Embed.Empty
+        color = EMPTY
 
     message = create_message(title, desc, color)
     message.set_thumbnail(url=round_info['thumbnail'])
@@ -73,7 +79,7 @@ def guess_message(round_info):
         guessed_by = '???'
         if data['guessed_by']:
             guessed_by = f"{data['print']} - guessed by {data['guessed_by'].mention}"
-        desc += f'{target_type}** : {guessed_by}\n'
+        desc += f'{target_type}**     : {guessed_by}\n'
 
     message = create_message(f"Round {round_info['round_no']} - Scoreboard", desc, discord.Color.dark_gray())
     return message
@@ -91,6 +97,7 @@ def normalise(s, target=False):
     return s
 
 def hide_details(s):
+    s = re.sub(r'\*', '\\*', s)
     s = re.sub(r'[\(\[].+[\)\]]', '', s)
     s = re.sub(r' - .*', '', s)
     s = s.strip()

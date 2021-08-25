@@ -52,7 +52,6 @@ async def play(ctx, playlist_link, points_to_win=5, rounds=30):
     global game
 
     print(points_to_win, rounds)
-
     if ctx.voice_client is None:
         if ctx.author.voice:
             await ctx.author.voice.channel.connect()
@@ -77,20 +76,24 @@ async def end(ctx):
         await ctx.send(embed=strings.create_error('No game in progress.'))
         return
 
+    await ctx.send(embed=discord.Embed(description='Game forcibily ended.'))
+    game.end_round(skipped=True)
+    await ctx.channel.send(embed=strings.round_message(game.round_info, game.leaderboard()))
+    game.suspend()
+    await ctx.channel.send(embed=strings.end_message(game.playlist_info, game.leaderboard()))
+
     server = ctx.guild
     voice_channel = server.voice_client
     await voice_channel.disconnect()
 
-    game.in_progress = False
-    game.end_round(skipped=True)
-    await ctx.send(embed=discord.Embed(title='Game Forcibily Ended'))
+    game = None
 
 @slash.slash(name='pause', description='To pause the game.')
 async def pause(ctx):
     message = strings.create_error('No game in progress.')
     if game:
         if game.in_progress:
-            message = strings.create_message('Game Paused', 'Game is currently paused, type */resume* to resume.')
+            message = discord.Embed(description=strings.PAUSE_MESSAGE)
             server = ctx.guild
             voice_channel = server.voice_client
             voice_channel.stop()
@@ -107,7 +110,7 @@ async def resume(ctx):
         if game.in_progress:
             message = strings.create_error('Game is already in progress.')
         else:
-            message = discord.Embed(title='Game Resumed')
+            message = discord.Embed(description='**Game Resumed**')
             game.start(bot.loop.create_task(game_handler(ctx)))
 
     await ctx.send(embed=message)
@@ -117,7 +120,7 @@ async def skip(ctx):
     message = strings.create_error('No game in progress.')
     if game:
         if game.in_progress:
-            message = discord.Embed(title='Round Skipped')
+            message = discord.Embed(description='**Round Skipped**')
             game.end_round(skipped=True)
         else:
             message = strings.create_error('Round has not started.')
@@ -153,12 +156,12 @@ async def game_handler(ctx):
 
         round_info = game.round_info
         async with ctx.channel.typing():
-            player = await YTDLSource.from_url(round_info['search_string'], loop=bot.loop, stream=True)
+            player = await YTDLSource.from_url(round_info['search_string'], loop=bot.loop)
             voice_channel.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
-
-        print('hi')
-        await ctx.channel.send(embed=strings.guess_message(round_info))
         print(player.title)
+
+        await ctx.channel.send(embed=strings.guess_message(round_info))
+        # print(player.title)
 
         game.in_progress = True
         await asyncio.sleep(30)
@@ -166,9 +169,7 @@ async def game_handler(ctx):
         await ctx.channel.send(embed=strings.round_message(round_info, game.leaderboard()))
         game.new_round()
 
-    print('yeet')
-    end_message = strings.end_message(game.playlist_info, game.leaderboard())
-    await ctx.channel.send(embed=end_message)
+    await ctx.channel.send(embed=strings.end_message(game.playlist_info, game.leaderboard()))
     game = None
 
 bot.run(TOKEN)

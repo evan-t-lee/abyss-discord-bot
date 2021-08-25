@@ -35,16 +35,15 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.url = data.get('url')
 
     @classmethod
-    async def from_url(cls, search_string, *, loop=None, stream=False):
+    async def from_url(cls, search_string, *, loop=None):
         loop = loop or asyncio.get_event_loop()
         link = ytm.search(search_string, "songs")
         url = f"https://youtu.be/{link[0]['videoId']}" if link else f'{search_string} audio'
         print(url)
-        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=not stream))
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
 
         if 'entries' in data:
             # take first item from a playlist
             data = data['entries'][0]
 
-        filename = data['url'] if stream else ytdl.prepare_filename(data)
-        return cls(discord.FFmpegPCMAudio(filename, **ffmpeg_options), data=data)
+        return cls(discord.FFmpegPCMAudio(data['url'], **ffmpeg_options), data=data)

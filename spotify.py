@@ -7,7 +7,7 @@ import spotipy
 from spotipy.oauth2 import SpotifyClientCredentials
 
 load_dotenv()
-CLIENT_ID = os.getenv('CLIENT_ID')
+CLIENT_ID = os.getenv('SPOTIPY_CLIENT_ID')
 sp = spotipy.Spotify(client_credentials_manager=SpotifyClientCredentials(CLIENT_ID))
 
 class Spotify:

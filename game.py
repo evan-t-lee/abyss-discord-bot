@@ -25,6 +25,10 @@ class Game:
 
     def new_round(self):
         round_no = self.round_info['round_no']
+        if round_no == len(self.playlist):
+            self.in_progress = False
+            return
+
         song = self.playlist[round_no]
         self.round_info = {
             'round_no': round_no + 1,
@@ -35,11 +39,13 @@ class Game:
         }
         print(self.round_info)
 
+
     def end_round(self, skipped=False):
         if skipped:
             self.round_info['skipped'] = True
-        self.task._fut_waiter.set_result(None)
-        self.task._fut_waiter.cancel()
+        if self.task._fut_waiter:
+            self.task._fut_waiter.set_result(None)
+            self.task._fut_waiter.cancel()
 
     def leaderboard(self):
         leaderboard = {}
