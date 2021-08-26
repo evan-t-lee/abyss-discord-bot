@@ -48,7 +48,7 @@ async def on_ready():
         )
     ]
 )
-async def play(ctx, playlist_link, points_to_win=5, rounds=30):
+async def play(ctx, playlist_link, points_to_win=15, rounds=30):
     global game
 
     print(points_to_win, rounds)
