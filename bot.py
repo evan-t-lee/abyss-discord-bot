@@ -80,7 +80,7 @@ async def end(ctx):
     if not game:
         await ctx.send(embed=strings.create_error('No game in progress.'))
     else:
-        await ctx.send(embed=discord.Embed(description='Game forcibily ended.'))
+        await ctx.send(embed=discord.Embed(description='**Game Forcibily Ended**'))
         game.end_round(skipped=True)
         await ctx.channel.send(embed=strings.round_message(game.round_info, game.leaderboard()))
         game.suspend()
@@ -96,7 +96,7 @@ async def leave(ctx):
 
     if voice_channel:
         if not GAMES.get(ctx.guild):
-            await ctx.send(embed=strings.create_error('Abyss has disconnected.'))
+            await ctx.send(embed=discord.Embed(description='**Abyss has Disconnected.**'))
         else:
             await ctx.invoke(end)
         await voice_channel.disconnect()
