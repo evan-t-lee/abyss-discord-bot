@@ -12,16 +12,20 @@ class Game:
         self.round_info = {'round_no': 0}
         self.task = None
 
-    def start(self, task):
+    def is_running(self):
+        return self.in_progress and self.task
+
+    def start(self, task, resume=False):
         self.in_progress = True
         self.task = task
-        self.new_round()
+        if not resume:
+            self.new_round()
 
     def suspend(self):
+        if self.in_progress:
+            self.task.cancel()
+            self.task = None
         self.in_progress = False
-        self.round_info['round_no'] = self.round_info.get('round_no', 0) - 1
-        self.task.cancel()
-        self.task = None
 
     def new_round(self):
         round_no = self.round_info['round_no']
@@ -43,7 +47,7 @@ class Game:
     def end_round(self, skipped=False):
         if skipped:
             self.round_info['skipped'] = True
-        if self.task._fut_waiter:
+        if self.task and self.task._fut_waiter:
             self.task._fut_waiter.set_result(None)
             self.task._fut_waiter.cancel()
 

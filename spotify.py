@@ -32,9 +32,10 @@ class Spotify:
 
         results = sp_playlist['tracks']
         tracks = results['items']
-        while results['next']:
+        while results['next'] and len(tracks) < 500:
             results = sp.next(results)
             tracks.extend(results['items'])
+        print(len(tracks))
 
         playlist = []
         for item in tracks:
