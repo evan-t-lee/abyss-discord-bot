@@ -19,6 +19,7 @@ intents = discord.Intents().all()
 bot = discord.ext.commands.Bot(command_prefix='!', intents=intents)
 slash = SlashCommand(bot, sync_commands=True)
 
+# debugging
 guild_ids = [int(GUILD_ID), 183878793713287169]
 
 GAMES = {}
@@ -49,10 +50,9 @@ async def on_ready():
             description='The total number of rounds in the game.',
             required=False
         )
-    ],
-    guild_ids=guild_ids
+    ]
 )
-async def play(ctx, playlist_link, points_to_win=15, rounds=30, guild_ids=guild_ids):
+async def play(ctx, playlist_link, points_to_win=15, rounds=30):
     global GAMES
 
     if ctx.voice_client is None:
@@ -72,7 +72,7 @@ async def play(ctx, playlist_link, points_to_win=15, rounds=30, guild_ids=guild_
 
     await ctx.send(embed=start_message)
 
-@slash.slash(name='end',description='To end the game.', guild_ids=guild_ids)
+@slash.slash(name='end',description='To end the game.')
 async def end(ctx):
     global GAMES
 
@@ -87,7 +87,7 @@ async def end(ctx):
         await ctx.channel.send(embed=strings.end_message(game.playlist_info, game.leaderboard()))
         del GAMES[ctx.guild]
 
-@slash.slash(name='leave',description='To get Abyss to disconnect.', guild_ids=guild_ids)
+@slash.slash(name='leave',description='To get Abyss to disconnect.')
 async def leave(ctx):
     global GAMES
 
@@ -103,7 +103,7 @@ async def leave(ctx):
     else:
         await ctx.send(embed=strings.create_error('Abyss is not currently connected.'))
 
-@slash.slash(name='pause', description='To pause the game.', guild_ids=guild_ids)
+@slash.slash(name='pause', description='To pause the game.')
 async def pause(ctx):
     message = strings.create_error('No game in progress.')
     game = GAMES.get(ctx.guild)
@@ -119,7 +119,7 @@ async def pause(ctx):
 
     await ctx.send(embed=message)
 
-@slash.slash(name='resume', description='To resume the game.', guild_ids=guild_ids)
+@slash.slash(name='resume', description='To resume the game.')
 async def resume(ctx):
     message = strings.create_error('No game in progress.')
     game = GAMES.get(ctx.guild)
@@ -132,7 +132,7 @@ async def resume(ctx):
 
     await ctx.send(embed=message)
 
-@slash.slash(name='skip', description='To skip round.', guild_ids=guild_ids)
+@slash.slash(name='skip', description='To skip round.')
 async def skip(ctx):
     message = strings.create_error('No game in progress.')
     game = GAMES.get(ctx.guild)
