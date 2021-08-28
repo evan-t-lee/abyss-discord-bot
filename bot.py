@@ -13,14 +13,14 @@ import strings
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
-GUILD_ID = os.getenv('DISCORD_GUILD')
 
 intents = discord.Intents().all()
 bot = discord.ext.commands.Bot(command_prefix='!', intents=intents)
 slash = SlashCommand(bot, sync_commands=True)
 
-# debugging
-guild_ids = [int(GUILD_ID), 183878793713287169]
+# # DEBUGGING STUFF
+# GUILD_ID = os.getenv('DISCORD_GUILD')
+# guild_ids = [int(GUILD_ID), 183878793713287169]
 
 GAMES = {}
 
