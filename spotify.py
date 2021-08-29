@@ -21,7 +21,7 @@ class Spotify:
             raise Exception
 
     @staticmethod
-    def get_playlist(url):
+    def get_playlist(url, rounds):
         sp_playlist = sp.playlist(Spotify.parse_link(url),fields='name,images,tracks')
 
         placeholder = 'https://cdn.freebiesupply.com/logos/large/2x/spotify-2-logo-png-transparent.png'
@@ -35,10 +35,11 @@ class Spotify:
         while results['next'] and len(tracks) < 500:
             results = sp.next(results)
             tracks.extend(results['items'])
+        shuffle(tracks)
         print(len(tracks))
 
         playlist = []
-        for item in tracks:
+        for item in tracks[:rounds]:
             track = item['track']
             formated_artists = [artist['name'] for artist in track['artists']]
             formatted_track = {
@@ -47,5 +48,4 @@ class Spotify:
                 'thumbnail': track['album']['images'][0]['url'] if track['album']['images'] else placeholder
             }
             playlist.append(formatted_track)
-        shuffle(playlist)
-        return playlist_info, playlist
+        return playlist_info, playlist[:rounds]

@@ -7,7 +7,7 @@ class Game:
     def __init__(self, url, points_to_win, rounds):
         self.in_progress = False
         self.points_to_win = points_to_win
-        self.playlist_info, self.playlist  = Spotify.get_playlist(url)[:rounds]
+        self.playlist_info, self.playlist  = Spotify.get_playlist(url, rounds)
         self.scoreboard = {}
         self.round_info = {'round_no': 0}
         self.task = None
