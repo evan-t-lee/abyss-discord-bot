@@ -2,17 +2,59 @@
 
 ## Usage
 
-**TODO**
+Click this [link](https://discord.com/api/oauth2/authorize?client_id=879399074191794177&permissions=8&scope=bot%20applications.commands) to invite Abyss to your Discord server, then follow the steps and accept the permissions.
+
+Once Abyss has succesfully joined the server, just start a game by typing `/play` and following the tab prompts in any channel. Abyss will join the voice channel you are currently in and begin the game, just follow Abyss' message prompts to play.
+
+The following are the list of commands with which to use Abyss.
+
+#### Commands
+
+`/play {playlist_link} {points_to_win} {rounds}`
+
+Connects Abyss to the user's voice channel and start a game with the specified settings.
+
+- **playlist\_link**: The spotify playlist that you want to use for the game, this can be found by right clicking the playlist, then clicking share and copying the playlist link.
+- **points\_to\_win** (optional): The amount of points needed to win the game, default is set to 15.
+- **rounds** (optional): The amount of rounds in a game, default is set to 30.
+
+`/end`
+
+Ends any currently running game, will continue to play the last song.
+
+`/pause`
+
+Pauses the game in the current state if there is a game currently running. Cannot be called before a round has started.
+
+`/resume`
+
+Resumes the game to the last played round while retaining state at which the game was paused.
+
+`/skip`
+
+Skips the current round being played, while retaining any points that may have been earned. Cannot be called before a round has started.
+
+`/leave`
+
+Disconnects Abyss from any voice channel it may be connected to and forcibly ends any games currently being played.
 
 ## Versions
+
+### V1.2
+
+**Released 30/08/21**
+
+- **Created** readme documentation on how to use bot.
+- **Updated** song searching algorithm to select song more accurately.
+- **Fixed** bug with game not ending when round limit was reached.
 
 ### V1.1
 
 **Released 28/08/21**
 
 - Split /end functionality into /leave and /end.
-	- **New** /leave command will cause bot to leave any voice channels, will also force end any games in progress.
-	- **Updated** /end command will end the current game but bot will remain in voice channel and continue playing the last song.
+	- **New** `/leave` command will cause bot to leave any voice channels, will also force end any games in progress.
+	- **Updated** `/end` command will end the current game but bot will remain in voice channel and continue playing the last song.
 - **Updated** bot to handle multiple games in different servers.
 - **Fixed** issue with /end when game is paused.
 - **Fixed** issue with extremely large playlists.
@@ -22,4 +64,4 @@
 **Released 26/08/21**
 
 - First version of bot deployed and now available on live servers!
-- Available commands: /play, /pause, /resume, /skip, and /end
+- Available commands: /play, /end, /pause, /resume, and /skip
