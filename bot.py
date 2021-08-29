@@ -174,7 +174,7 @@ async def game_handler(ctx):
 
         round_info = game.round_info
         async with ctx.channel.typing():
-            player = await YTDLSource.from_url(round_info['search_string'], loop=bot.loop)
+            player = await YTDLSource.from_url(round_info['song_info'], loop=bot.loop)
             voice_channel.play(player, after=lambda e: print(f'Player error: {e}') if e else None)
         print(player.title)
 

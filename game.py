@@ -37,10 +37,11 @@ class Game:
         self.round_info = {
             'round_no': round_no + 1,
             'skipped': False,
-            'search_string': f"{song['name']} {song['artists'][0]} ",
+            'song_info': [strings.hide_details(song['name']), song['artists'][0]],
             'thumbnail': song['thumbnail'],
             'targets': Game.create_targets(song)
         }
+        print('\n-------------------------NEW ROUND---------------------------')
         print(self.round_info)
 
 

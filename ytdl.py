@@ -1,3 +1,4 @@
+from difflib import SequenceMatcher
 import discord
 import youtube_dl
 from ytmusicapi import YTMusic
@@ -26,6 +27,25 @@ ffmpeg_options = {
 
 ytdl = youtube_dl.YoutubeDL(ytdl_format_options)
 
+def get_url(song_info):
+    search_string = f"{song_info[0]} {song_info[1]}"
+    res1 = ytm.search(search_string, 'songs')
+    res2 = ytm.search(search_string, 'videos')
+
+    if not res1 and not res2:
+        return search_string
+
+    if res1 and res2:
+        res1_artist = res1[0]['artists'][0]['name']
+        res2_artist = res2[0]['artists'][0]['name']
+        res1_ratio = SequenceMatcher(None, res1_artist, song_info[1]).ratio()
+        res2_ratio = SequenceMatcher(None, res2_artist, song_info[1]).ratio()
+        print(f"{res1_artist} : {res1_ratio} : youtu.be/{res1[0]['videoId']}")
+        print(f"{res2_artist} : {res2_ratio} : youtu.be/{res2[0]['videoId']}")
+        if res1_ratio >= 0.6 or res2_ratio >= 0.6:
+            return res1[0]['videoId'] if res1_ratio >= res2_ratio else res2[0]['videoId']
+    return res2[0]['videoId'] if res2 else res1[0]['videoId']
+
 # Youtube Download
 class YTDLSource(discord.PCMVolumeTransformer):
     def __init__(self, source, *, data, volume=0.5):
@@ -35,11 +55,9 @@ class YTDLSource(discord.PCMVolumeTransformer):
         self.url = data.get('url')
 
     @classmethod
-    async def from_url(cls, search_string, *, loop=None):
+    async def from_url(cls, song_info, *, loop=None):
         loop = loop or asyncio.get_event_loop()
-        link = ytm.search(search_string, "songs")
-        url = f"https://youtu.be/{link[0]['videoId']}" if link else f'{search_string} audio'
-        print(url)
+        url = get_url(song_info)
         data = await loop.run_in_executor(None, lambda: ytdl.extract_info(url, download=False))
 
         if 'entries' in data:

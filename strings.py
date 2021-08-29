@@ -99,6 +99,6 @@ def normalise(s, target=False):
 def hide_details(s):
     s = re.sub(r'\*', '\\*', s)
     s = re.sub(r'[\(\[].+[\)\]]', '', s)
-    s = re.sub(r' - .*', '', s)
+    s = re.sub(r' -.*', '', s)
     s = s.strip()
     return s
