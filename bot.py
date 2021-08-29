@@ -152,14 +152,13 @@ async def on_message(message):
 
     game = GAMES.get(message.guild)
     if game and game.is_running():
+        print(f'{message.author.name} : {message.content} : {strings.normalise(message.content)}')
         if game.check(message.author, message.content):
             if not game.score(message.author):
                 await message.channel.send(embed=strings.guess_message(game.round_info))
             else:
                 print('yo')
                 game.end_round()
-
-    print(f'{message.author.name} : {message.content} : {strings.normalise(message.content)}')
 
 async def game_handler(ctx):
     global GAMES
