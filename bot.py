@@ -63,11 +63,11 @@ async def play(ctx, playlist_link, points_to_win=15, rounds=30):
 
     start_message = strings.create_error('Game is already in progress.')
 
-    if ctx.guild not in GAMES:
+    if ctx.guild.id not in GAMES:
         game = Game(playlist_link, points_to_win, rounds)
         game.start(bot.loop.create_task(game_handler(ctx)))
-        start_message = strings.start_message(game.playlist_info, points_to_win, rounds)
-        GAMES[ctx.guild] = game
+        start_message = strings.start_message(game.playlist_info, points_to_win)
+        GAMES[ctx.guild.id] = game
 
     await ctx.send(embed=start_message)
 
@@ -75,7 +75,7 @@ async def play(ctx, playlist_link, points_to_win=15, rounds=30):
 async def end(ctx):
     global GAMES
 
-    game = GAMES.get(ctx.guild)
+    game = GAMES.get(ctx.guild.id)
     if not game:
         await ctx.send(embed=strings.create_error('No game in progress.'))
     else:
@@ -94,7 +94,7 @@ async def leave(ctx):
     voice_channel = server.voice_client
 
     if voice_channel:
-        if not GAMES.get(ctx.guild):
+        if not GAMES.get(ctx.guild.id):
             await ctx.send(embed=discord.Embed(description='**Abyss has Disconnected.**'))
         else:
             await ctx.invoke(end)
