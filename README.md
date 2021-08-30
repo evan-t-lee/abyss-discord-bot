@@ -12,7 +12,7 @@ The following are the list of commands with which to use Abyss.
 
 `/play {playlist_link} {points_to_win} {rounds}`
 
-Connects Abyss to the user's voice channel and start a game with the specified settings.
+Connects Abyss to the user's voice channel and starts a game with the specified settings.
 
 - **playlist\_link**: The spotify playlist that you want to use for the game, this can be found by right clicking the playlist, then clicking share and copying the playlist link.
 - **points\_to\_win** (optional): The amount of points needed to win the game, default is set to 15.
@@ -34,19 +34,28 @@ Resumes the game to the last played round while retaining state at which the gam
 
 Skips the current round being played, while retaining any points that may have been earned. Cannot be called before a round has started.
 
+`/extend`
+
+Extends the current round, this is not in addition to the original 30 seconds but rather plays for 30 seconds from the point the command was called.
+
 `/leave`
 
 Disconnects Abyss from any voice channel it may be connected to and forcibly ends any games currently being played.
 
 ## Versions
 
-### V1.2
+### V1.2 (Current)
 
 **Released 30/08/21**
 
-- **Created** readme documentation on how to use bot.
+- **New** readme documentation on how to use bot.
+- **New** `/extend` command will extend the current round by 30 seconds.
 - **Updated** song searching algorithm to select song more accurately.
 - **Fixed** bug with game not ending when round limit was reached.
+- **Fixed** bug with rounds not being correctly shown when playlist was less than rounds.
+- Tldr: Faster performance and cleaner code.
+	- Abstracted functionality of string comparison and message generation.
+	- Games now use *guild_id* as keys instead of the entire guild.
 
 ### V1.1
 
