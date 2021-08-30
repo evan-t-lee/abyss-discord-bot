@@ -133,6 +133,17 @@ async def skip(ctx):
 
     await ctx.send(embed=strings.SKIP_MESSAGE[state])
 
+@slash.slash(name='extend', description='To extend the current round.')
+async def extend(ctx):
+    game = GAMES.get(ctx.guild.id)
+    state = Game.get_state(game)
+
+    if state == 0:
+        game.round_info['remaining_time'] += 30
+        game.end_round()
+
+    await ctx.send(embed=strings.EXTEND_MESSAGE[state])
+
 @bot.event
 async def on_message(message):
     if message.author == bot.user:
@@ -155,7 +166,6 @@ async def game_handler(ctx):
 
     game = GAMES[ctx.guild.id]
     while game.in_progress:
-        game.in_progress = False
         voice_channel.stop()
         await asyncio.sleep(3)
 
@@ -166,8 +176,11 @@ async def game_handler(ctx):
         print(player.title)
         await ctx.channel.send(embed=strings.guess_message(round_info))
 
-        game.in_progress = True
-        await asyncio.sleep(30)
+        game.round_info['remaining_time'] = 30
+        while game.round_in_progress():
+            await asyncio.sleep(30)
+            game.round_info['remaining_time'] -= 30
+
 
         await ctx.channel.send(embed=strings.round_message(round_info, game.leaderboard()))
         game.new_round()
