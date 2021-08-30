@@ -19,8 +19,7 @@ bot = discord.ext.commands.Bot(command_prefix='!', intents=intents)
 slash = SlashCommand(bot, sync_commands=True)
 
 # # DEBUGGING STUFF
-# GUILD_ID = os.getenv('DISCORD_GUILD')
-# guild_ids = [int(GUILD_ID), 183878793713287169]
+# guild_ids = [878334089747365919, 183878793713287169, 501288815659581442]
 
 GAMES = {}
 
