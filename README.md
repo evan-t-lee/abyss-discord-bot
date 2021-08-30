@@ -2,7 +2,7 @@
 
 ## Usage
 
-Click this [link](https://discord.com/api/oauth2/authorize?client_id=879399074191794177&permissions=8&scope=bot%20applications.commands) to invite Abyss to your Discord server, then follow the steps and accept the permissions.
+Click this [link](https://discord.com/api/oauth2/authorize?client_id=878333211946672188&permissions=8&scope=bot%20applications.commands) to invite Abyss to your Discord server, then follow the steps and accept the permissions.
 
 Once Abyss has succesfully joined the server, just start a game by typing `/play` and following the tab prompts in any channel. Abyss will join the voice channel you are currently in and begin the game, just follow Abyss' message prompts to play.
 
