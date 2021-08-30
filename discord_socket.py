@@ -15,7 +15,7 @@ heartbeat = {
 id_message = {
     "op": 2,
     "d": {
-        "token": "ODc4MzMzMjExOTQ2NjcyMTg4.YR_pjA.5YKT24kAnAZ7sjxvls001Tc171Y",
+        "token": TOKEN,
         "intents": 513,
         "properties": {
             "$os": "linux",
