@@ -1,7 +1,7 @@
-from difflib import SequenceMatcher
 import discord
 import youtube_dl
 from ytmusicapi import YTMusic
+from strings import similarity_ratio
 
 ytm = YTMusic()
 
@@ -36,13 +36,13 @@ def get_url(song_info):
         return search_string
 
     if res1 and res2:
-        res1_artist = res1[0]['artists'][0]['name']
-        res2_artist = res2[0]['artists'][0]['name']
-        res1_ratio = SequenceMatcher(None, res1_artist, song_info[1]).ratio()
-        res2_ratio = SequenceMatcher(None, res2_artist, song_info[1]).ratio()
+        res1_artist = res1[0]['artists'][0]['name'].lower()
+        res2_artist = res2[0]['artists'][0]['name'].lower()
+        res1_ratio = similarity_ratio(res1_artist, song_info[1])
+        res2_ratio = similarity_ratio(res2_artist, song_info[1])
         print(f"{res1_artist} : {res1_ratio} : youtu.be/{res1[0]['videoId']}")
         print(f"{res2_artist} : {res2_ratio} : youtu.be/{res2[0]['videoId']}")
-        if res1_ratio >= 0.6 or res2_ratio >= 0.6:
+        if res1_ratio >= 0.8 or res2_ratio >= 0.8:
             return res1[0]['videoId'] if res1_ratio >= res2_ratio else res2[0]['videoId']
     return res2[0]['videoId'] if res2 else res1[0]['videoId']
 

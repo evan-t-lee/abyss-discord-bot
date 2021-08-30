@@ -1,3 +1,4 @@
+from difflib import SequenceMatcher
 import discord
 import re
 import string
@@ -6,8 +7,6 @@ from unidecode import unidecode
 # CONSTANTS
 EMPTY = discord.Embed.Empty
 SPACE = '\u200B'
-
-PAUSE_MESSAGE = '**Game Paused** : Type */resume* to unpause game.'
 
 def create_message(title=EMPTY, desc=EMPTY, color=EMPTY):
     message = discord.Embed(
@@ -20,9 +19,9 @@ def create_message(title=EMPTY, desc=EMPTY, color=EMPTY):
 def create_error(desc):
     return create_message(EMPTY, f'**Error** : {desc}', discord.Color.red())
 
-def start_message(playlist_info, points_to_win, rounds):
+def start_message(playlist_info, points_to_win):
     desc = f"**Playlist** : {playlist_info['name']}\n"
-    desc += f'**Rounds** : {rounds}\n{SPACE}'
+    desc += f"**Rounds** : {playlist_info['length']}\n{SPACE}"
     message = discord.Embed(
         title='Starting a game!',
         description=desc,
@@ -102,6 +101,9 @@ def hide_details(s):
     s = re.sub(r' -.*', '', s)
     s = s.strip()
     return s
+
+def similarity_ratio(str1, str2):
+    return SequenceMatcher(None, str1.lower(), str2.lower()).ratio()
 
 PAUSE_MESSAGE = {
     0: create_message(desc='**Game Paused** : Type */resume* to unpause game.'),
