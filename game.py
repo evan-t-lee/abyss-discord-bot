@@ -97,3 +97,13 @@ class Game:
                 'guessed_by': None
             }
         return targets
+
+    @staticmethod
+    def get_state(game):
+        if game:
+            if game.in_progress:
+                if game.round_in_progress():
+                    return 0
+                return 1
+            return 2
+        return 3

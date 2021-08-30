@@ -102,3 +102,31 @@ def hide_details(s):
     s = re.sub(r' -.*', '', s)
     s = s.strip()
     return s
+
+PAUSE_MESSAGE = {
+    0: create_message(desc='**Game Paused** : Type */resume* to unpause game.'),
+    1: create_error('Round has not started.'),
+    2: create_error('Game is currently paused.'),
+    3: create_error('No game is in progress.')
+}
+
+RESUME_MESSAGE = {
+    0: create_error('Game is already in progress.'),
+    1: create_error('Round has not started.'),
+    2: create_message(desc='**Game Resumed**'),
+    3: create_error('No game is in progress.')
+}
+
+SKIP_MESSAGE = {
+    0: create_message(desc='**Round Skipped**'),
+    1: create_error('Round has not started.'),
+    2: create_error('Game is currently paused.'),
+    3: create_error('No game is in progress.')
+}
+
+EXTEND_MESSAGE = {
+    0: create_message(desc='**Round Extended**'),
+    1: create_error('Round has not started.'),
+    2: create_error('Game is currently paused.'),
+    3: create_error('No game is in progress.')
+}
