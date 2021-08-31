@@ -84,7 +84,7 @@ async def end(ctx):
         await ctx.channel.send(embed=strings.round_message(game.round_info, game.leaderboard()))
         game.suspend()
         await ctx.channel.send(embed=strings.end_message(game.playlist_info, game.leaderboard()))
-        del GAMES[ctx.guild]
+        del GAMES[ctx.guild.id]
 
 @slash.slash(name='leave',description='To get Abyss to disconnect.')
 async def leave(ctx):
