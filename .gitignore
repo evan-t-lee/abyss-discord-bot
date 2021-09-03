@@ -3,3 +3,4 @@
 !.gitignore
 !Procfile
 !requirements.txt
+!data.pkl
