@@ -12,11 +12,11 @@ The following are the list of commands with which to use Abyss.
 
 `/play {playlist_link} {points_to_win} {rounds}`
 
-Connects Abyss to the user's voice channel and starts a game with the specified settings.
+Connects Abyss to the user's voice channel and starts a game with the specified settings if supplied, otherwise the defaults are used.
 
 - **playlist\_link**: The spotify playlist that you want to use for the game, this can be found by right clicking the playlist, then clicking share and copying the playlist link.
-- **points\_to\_win** (optional): The amount of points needed to win the game, default is set to 15.
-- **rounds** (optional): The amount of rounds in a game, default is set to 30.
+- **points\_to\_win** (optional): The amount of points needed to win the game.
+- **rounds** (optional): The amount of rounds in a game
 
 `/end`
 
@@ -34,23 +34,41 @@ Resumes the game to the last played round while retaining state at which the gam
 
 Skips the current round being played, while retaining any points that may have been earned. Cannot be called before a round has started.
 
-`/extend`
+`/extend {duration}`
 
-Extends the current round, this is not in addition to the original 30 seconds but rather plays for 30 seconds from the point the command was called.
+Extends the current round by 30 seconds or the specified duration if supplied. Note that this is in addition to the original duration of each round.
+
+- **duration**: The duration of time that you would like to extend the round by. The duration range is between 10 and 60 which will be automatically applied if a value out of range is supplied.
 
 `/leave`
 
 Disconnects Abyss from any voice channel it may be connected to and forcibly ends any games currently being played.
 
+`/settings {points_to_win} {rounds} {round_time}`
+
+When no arguments are supplied, will show the current settings of a game. With any arguments, the updated settings will be shown.
+
+- **points\_to\_win** (optional): The amount of points needed to win the game, default is set to 15.
+- **rounds** (optional): The amount of rounds in a game, default is set to 30.
+- **round\_time** (optional): The duration of time each round runs for, default is set to 30.
+
 ## Versions
 
-### V1.2 (Current)
+### V1.3 (Current)
+
+**Released 03/09/21**
+
+- **New** `/settings` command to view or change the default settings of a game..
+- **Updated** song searching algorithm to select song more accurately.
+- **Updated** `/extend` command to handle varying extend durations.
+- **Fixed** bug with games not being properly ended.
+
+### V1.2
 
 **Released 30/08/21**
 
 - **New** readme documentation on how to use bot.
 - **New** `/extend` command will extend the current round by 30 seconds.
-- **Updated** song searching algorithm to select song more accurately.
 - **Fixed** bug with game not ending when round limit was reached.
 - **Fixed** bug with rounds not being correctly shown when playlist was less than rounds.
 - Tldr: Faster performance and cleaner code.
