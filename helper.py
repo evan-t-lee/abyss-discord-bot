@@ -15,3 +15,12 @@ def create_settings(*args):
         'rounds': settings[1],
         'round_time': settings[2]
     }
+
+def has_invalid_args(*args):
+    for i in range(len(args)):
+        if args[i] != None:
+            if args[i] <= 0:
+                return True
+            if i == 2 and args[i] >= 60:
+                return True
+    return False

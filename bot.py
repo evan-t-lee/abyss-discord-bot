@@ -68,6 +68,16 @@ async def on_guild_join(guild):
 async def play(ctx, playlist_link, points_to_win=None, rounds=None):
     global GAMES
 
+    game = GAMES.get(ctx.guild.id)
+    if game:
+        await ctx.send(embed=strings.create_error('Game is already in progress.'))
+        return
+
+    args = (points_to_win, rounds)
+    if helper.has_invalid_args(*args):
+        await ctx.send(embed=strings.create_error('Invalid arguments were supplied.'))
+        return
+
     if ctx.voice_client is None:
         if ctx.author.voice:
             await ctx.author.voice.channel.connect()
@@ -75,17 +85,11 @@ async def play(ctx, playlist_link, points_to_win=None, rounds=None):
             await ctx.send("You are not connected to a voice channel.")
             raise commands.CommandError("Author not connected to a voice channel.")
 
-    start_message = strings.create_error('Game is already in progress.')
-    game = GAMES.get(ctx.guild.id)
-    if not game:
-        args = [points_to_win, rounds]
-        settings = helper.create_settings(*args) if any(args) else DATA[ctx.guild.id]['settings']
-        game = Game(playlist_link, settings)
-        game.start(bot.loop.create_task(game_handler(ctx)))
-        GAMES[ctx.guild.id] = game
-        start_message = strings.start_message(game.playlist_info, game.points_to_win)
-
-    await ctx.send(embed=start_message)
+    settings = helper.create_settings(*args) if any(args) else DATA[ctx.guild.id]['settings']
+    game = Game(playlist_link, settings)
+    game.start(bot.loop.create_task(game_handler(ctx)))
+    GAMES[ctx.guild.id] = game
+    await ctx.send(embed=strings.start_message(game.playlist_info, game.points_to_win))
 
 @slash.slash(name='end',description='To end the game.')
 async def end(ctx):
@@ -161,12 +165,12 @@ async def extend(ctx, duration=30):
     game = GAMES.get(ctx.guild.id)
     state = Game.get_state(game)
     if state == 0:
-        game.round_info['remaining_time'] += min(duration, 60)
+        game.round_info['remaining_time'] += duration
     await ctx.send(embed=strings.EXTEND_MESSAGE[state])
 
 @slash.slash(
     name='settings',
-    description='To view and change the default settings of a game.',
+    description='To view or change the default settings of a game.',
     options=[
         create_option(
             name='points_to_win',
@@ -192,6 +196,10 @@ async def settings(ctx, points_to_win=None, rounds=None, round_time=None):
     global DATA
 
     args = (points_to_win, rounds, round_time)
+    if helper.has_invalid_args(*args):
+        await ctx.send(embed=strings.create_error('Invalid arguments were supplied.'))
+        return
+
     updated = False
     if any(args):
         updated = True
