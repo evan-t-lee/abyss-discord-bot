@@ -165,6 +165,10 @@ async def extend(ctx, duration=30):
     game = GAMES.get(ctx.guild.id)
     state = Game.get_state(game)
     if state == 0:
+        args = (None, None, duration)
+        if helper.has_invalid_args(*args):
+            await ctx.send(embed=strings.create_error('Invalid arguments were supplied.'))
+            return
         game.round_info['remaining_time'] += duration
     await ctx.send(embed=strings.EXTEND_MESSAGE[state])
 

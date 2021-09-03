@@ -21,6 +21,6 @@ def has_invalid_args(*args):
         if args[i] != None:
             if args[i] <= 0:
                 return True
-            if i == 2 and args[i] >= 60:
+            if i == 2 and not (10 <= args[i] <= 60):
                 return True
     return False
