@@ -38,7 +38,7 @@ Skips the current round being played, while retaining any points that may have b
 
 Extends the current round by 30 seconds or the specified duration if supplied. Note that this is in addition to the original duration of each round.
 
-- **duration**: The duration of time that you would like to extend the round by. The duration range is between 10 and 60 which will be automatically applied if a value out of range is supplied.
+- **duration**: The duration of time that you would like to extend the round by, acceptable range is between 10 and 60.
 
 `/leave`
 
@@ -50,7 +50,7 @@ When no arguments are supplied, will show the current settings of a game. With a
 
 - **points\_to\_win** (optional): The amount of points needed to win the game, default is set to 15.
 - **rounds** (optional): The amount of rounds in a game, default is set to 30.
-- **round\_time** (optional): The duration of time each round runs for, default is set to 30.
+- **round\_time** (optional): The duration of time each round runs for, default is set to 30 and acceptable range is between 10 and 60 but can be extended by */extend*.
 
 ## Versions
 
@@ -61,6 +61,7 @@ When no arguments are supplied, will show the current settings of a game. With a
 - **New** `/settings` command to view or change the default settings of a game..
 - **Updated** song searching algorithm to select song more accurately.
 - **Updated** `/extend` command to handle varying extend durations.
+- **Updated** commands to handle more invalid arguments.
 - **Fixed** bug with games not being properly ended.
 
 ### V1.2
