@@ -141,21 +141,27 @@ async def resume(ctx):
 async def skip(ctx):
     game = GAMES.get(ctx.guild.id)
     state = Game.get_state(game)
-
     if state == 0:
         game.end_round(skipped=True)
-
     await ctx.send(embed=strings.SKIP_MESSAGE[state])
 
-@slash.slash(name='extend', description='To extend the current round.')
-async def extend(ctx):
+@slash.slash(
+    name='extend',
+    description='To extend the current round.',
+    options=[
+        create_option(
+            name='duration',
+            option_type=4,
+            description='The duration of time to extend the round by.',
+            required=False
+        )
+    ]
+)
+async def extend(ctx, duration=30):
     game = GAMES.get(ctx.guild.id)
     state = Game.get_state(game)
-
     if state == 0:
-        game.round_info['remaining_time'] += 30
-        game.end_round()
-
+        game.round_info['remaining_time'] += min(duration, 60)
     await ctx.send(embed=strings.EXTEND_MESSAGE[state])
 
 @slash.slash(
@@ -215,7 +221,8 @@ async def game_handler(ctx):
     server = ctx.guild
     voice_channel = server.voice_client
 
-    game = GAMES[ctx.guild.id]
+    game = GAMES.get(ctx.guild.id)
+    settings = DATA[ctx.guild.id]['settings']
     while game.in_progress:
         voice_channel.stop()
         await asyncio.sleep(3)
@@ -227,16 +234,16 @@ async def game_handler(ctx):
         print(player.title)
         await ctx.channel.send(embed=strings.guess_message(round_info))
 
-        game.round_info['remaining_time'] = 30
+        game.round_info['remaining_time'] = settings['round_time']
         while game.round_in_progress():
-            await asyncio.sleep(30)
-            game.round_info['remaining_time'] -= 30
-
+            run_time = game.round_info['remaining_time']
+            await asyncio.sleep(run_time)
+            game.round_info['remaining_time'] -= run_time
 
         await ctx.channel.send(embed=strings.round_message(round_info, game.leaderboard()))
         game.new_round()
 
     await ctx.channel.send(embed=strings.end_message(game.playlist_info, game.leaderboard()))
-    del GAMES[ctx.guild]
+    del GAMES[ctx.guild.id]
 
 bot.run(TOKEN)
