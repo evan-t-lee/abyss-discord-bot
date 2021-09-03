@@ -21,7 +21,7 @@ bot = discord.ext.commands.Bot(command_prefix='!', intents=intents)
 slash = SlashCommand(bot, sync_commands=True)
 
 # DEBUGGING STUFF
-guild_ids = [878334089747365919, 183878793713287169]#, 501288815659581442]
+# guild_ids = [878334089747365919, 183878793713287169, 501288815659581442]
 
 GAMES = {}
 with open('data.pkl', 'rb') as f:
@@ -194,7 +194,7 @@ async def extend(ctx, duration=30):
             description='The duration of time each round runs for.',
             required=False
         )
-    ], guild_ids=guild_ids
+    ]
 )
 async def settings(ctx, points_to_win=None, rounds=None, round_time=None):
     global DATA
