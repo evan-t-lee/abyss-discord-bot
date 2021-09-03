@@ -1,14 +1,16 @@
 # bot.py
 import os
 from dotenv import load_dotenv
-
 import asyncio
+import pickle
+
 import discord
 from discord_slash import SlashCommand
 from discord_slash.utils.manage_commands import create_option
 
 from ytdl import YTDLSource
 from game import Game
+import helper
 import strings
 
 load_dotenv()
@@ -18,14 +20,26 @@ intents = discord.Intents().all()
 bot = discord.ext.commands.Bot(command_prefix='!', intents=intents)
 slash = SlashCommand(bot, sync_commands=True)
 
-# # DEBUGGING STUFF
-# guild_ids = [878334089747365919, 183878793713287169, 501288815659581442]
+# DEBUGGING STUFF
+guild_ids = [878334089747365919, 183878793713287169]#, 501288815659581442]
 
 GAMES = {}
+with open('data.pkl', 'rb') as f:
+    DATA = pickle.load(f)
+print(DATA)
 
 @bot.event
 async def on_ready():
     print(f'{bot.user.name} has connected to Discord!')
+
+@bot.event
+async def on_guild_join(guild):
+    global DATA
+
+    DATA[guild.id] = helper.create_server_data()
+    with open('data.pkl', 'wb') as f:
+        pickle.dump(DATA, f)
+    print(DATA)
 
 @slash.slash(
     name='play',
@@ -51,7 +65,7 @@ async def on_ready():
         )
     ]
 )
-async def play(ctx, playlist_link, points_to_win=15, rounds=30):
+async def play(ctx, playlist_link, points_to_win=None, rounds=None):
     global GAMES
 
     if ctx.voice_client is None:
@@ -62,12 +76,14 @@ async def play(ctx, playlist_link, points_to_win=15, rounds=30):
             raise commands.CommandError("Author not connected to a voice channel.")
 
     start_message = strings.create_error('Game is already in progress.')
-
-    if ctx.guild.id not in GAMES:
-        game = Game(playlist_link, points_to_win, rounds)
+    game = GAMES.get(ctx.guild.id)
+    if not game:
+        args = [points_to_win, rounds]
+        settings = helper.create_settings(*args) if any(args) else DATA[ctx.guild.id]['settings']
+        game = Game(playlist_link, settings)
         game.start(bot.loop.create_task(game_handler(ctx)))
-        start_message = strings.start_message(game.playlist_info, points_to_win)
         GAMES[ctx.guild.id] = game
+        start_message = strings.start_message(game.playlist_info, game.points_to_win)
 
     await ctx.send(embed=start_message)
 
@@ -88,8 +104,6 @@ async def end(ctx):
 
 @slash.slash(name='leave',description='To get Abyss to disconnect.')
 async def leave(ctx):
-    global GAMES
-
     server = ctx.guild
     voice_channel = server.voice_client
 
@@ -143,6 +157,43 @@ async def extend(ctx):
         game.end_round()
 
     await ctx.send(embed=strings.EXTEND_MESSAGE[state])
+
+@slash.slash(
+    name='settings',
+    description='To view and change the default settings of a game.',
+    options=[
+        create_option(
+            name='points_to_win',
+            option_type=4,
+            description='The amount of points needed to win.',
+            required=False
+        ),
+        create_option(
+            name='rounds',
+            option_type=4,
+            description='The total number of rounds in the game.',
+            required=False
+        ),
+        create_option(
+            name='round_time',
+            option_type=4,
+            description='The duration of time each round runs for.',
+            required=False
+        )
+    ], guild_ids=guild_ids
+)
+async def settings(ctx, points_to_win=None, rounds=None, round_time=None):
+    global DATA
+
+    args = (points_to_win, rounds, round_time)
+    updated = False
+    if any(args):
+        updated = True
+        DATA[ctx.guild.id]['settings'] = helper.create_settings(*args)
+        print(DATA)
+        with open('data.pkl', 'wb') as f:
+            pickle.dump(DATA, f)
+    await ctx.send(embed=strings.settings_message(DATA[ctx.guild.id]['settings'], updated))
 
 @bot.event
 async def on_message(message):

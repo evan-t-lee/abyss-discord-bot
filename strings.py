@@ -83,6 +83,17 @@ def guess_message(round_info):
     message = create_message(f"Round {round_info['round_no']} - Scoreboard", desc, discord.Color.dark_gray())
     return message
 
+def settings_message(settings, updated):
+    title = f'Settings'
+    if updated:
+        title += ' (Updated)'
+    desc = 'To change a setting, use /settings followed what you would like changed.'
+    message = create_message(title, desc)
+    message.add_field(name='Points to Win', value=settings['points_to_win'])
+    message.add_field(name='Number of Rounds', value=settings['rounds'])
+    message.add_field(name='Round Duration', value=settings['round_time'])
+    return message
+
 def normalise(s, target=False):
     s = s.lower()
     s = re.sub(r'&', 'and', s)

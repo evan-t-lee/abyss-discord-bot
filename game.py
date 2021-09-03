@@ -4,10 +4,10 @@ import strings
 import spotify
 
 class Game:
-    def __init__(self, url, points_to_win, rounds):
+    def __init__(self, url, settings):
         self.in_progress = False
-        self.points_to_win = points_to_win
-        self.playlist_info, self.playlist = spotify.get_playlist(url, rounds)
+        self.points_to_win = settings['points_to_win']
+        self.playlist_info, self.playlist = spotify.get_playlist(url, settings['rounds'])
         self.scoreboard = {}
         self.round_info = {'round_no': 0, 'in_progress': False}
         self.task = None
