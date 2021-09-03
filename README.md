@@ -58,7 +58,7 @@ When no arguments are supplied, will show the current settings of a game. With a
 
 **Released 03/09/21**
 
-- **New** `/settings` command to view or change the default settings of a game..
+- **New** `/settings` command to view or change the default settings of a game.
 - **Updated** song searching algorithm to select song more accurately.
 - **Updated** `/extend` command to handle varying extend durations.
 - **Updated** commands to handle more invalid arguments.
