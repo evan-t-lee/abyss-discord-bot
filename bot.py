@@ -113,7 +113,7 @@ async def leave(ctx):
 
     if voice_channel:
         if not GAMES.get(ctx.guild.id):
-            await ctx.send(embed=discord.Embed(description='**Abyss has Disconnected.**'))
+            await ctx.send(embed=discord.Embed(description='**Abyss has Disconnected**'))
         else:
             await ctx.invoke(end)
         await voice_channel.disconnect()

@@ -24,3 +24,7 @@ def has_invalid_args(*args):
             if i == 2 and not (10 <= args[i] <= 60):
                 return True
     return False
+
+def write_data(data):
+    with open('data.pkl', 'wb') as f:
+        pickle.dump(DATA, f)

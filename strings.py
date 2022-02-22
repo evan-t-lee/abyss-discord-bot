@@ -101,8 +101,8 @@ def normalise(s, target=False):
         s = hide_details(s)
         s = unidecode(s)
     # s = re.sub(r'[\!\?][^w]', ' ', s)
-    s = re.sub(r' +', ' ', s)
     s = s.translate(str.maketrans('', '', string.punctuation))
+    s = re.sub(r' +', ' ', s)
     s = s.strip()
     return s
 
