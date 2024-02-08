@@ -1,15 +1,15 @@
 from difflib import SequenceMatcher
-import discord
+import interactions
 import re
 import string
 from unidecode import unidecode
 
 # CONSTANTS
-EMPTY = discord.Embed.Empty
+EMPTY = None
 SPACE = '\u200B'
 
 def create_message(title=EMPTY, desc=EMPTY, color=EMPTY):
-    message = discord.Embed(
+    message = interactions.Embed(
         title=title,
         description=desc,
         color=color
@@ -17,15 +17,15 @@ def create_message(title=EMPTY, desc=EMPTY, color=EMPTY):
     return message
 
 def create_error(desc):
-    return create_message(EMPTY, f'**Error** : {desc}', discord.Color.red())
+    return create_message(EMPTY, f'**Error** : {desc}', interactions.MaterialColors.RED)
 
 def start_message(playlist_info, points_to_win):
     desc = f"**Playlist** : {playlist_info['name']}\n"
     desc += f"**Rounds** : {playlist_info['length']}\n{SPACE}"
-    message = discord.Embed(
+    message = interactions.Embed(
         title='Starting a game!',
         description=desc,
-        color=discord.Color.blue()
+        color=interactions.MaterialColors.BLUE
     )
     message.set_thumbnail(url=playlist_info['thumbnail'])
     message.add_field(name='Whats the win con?', value=f'Playing first to {points_to_win} points!', inline=False)
@@ -44,8 +44,7 @@ def round_message(round_info, scoreboard):
             line += f" - guessed by {data['guessed_by'].mention}"
         desc += f'{line}\n'
     desc += SPACE
-    color = discord.Color.green()
-
+    color = interactions.MaterialColors.GREEN
     if round_info['skipped']:
         title += ' (Skipped)'
         color = EMPTY
@@ -60,7 +59,7 @@ def round_message(round_info, scoreboard):
 def end_message(playlist_info, scoreboard):
     desc = f"**Playlist** : {playlist_info['name']}"
     title = f'Game Finished!'
-    message = create_message(title, desc, discord.Color.blue())
+    message = create_message(title, desc, interactions.MaterialColors.BLUE)
     message.set_thumbnail(url=playlist_info['thumbnail'])
     value = scoreboard if scoreboard else 'No scores yet.'
     message.add_field(name='Leaderboard', value=value, inline=False)
@@ -80,7 +79,7 @@ def guess_message(round_info):
             guessed_by = f"{data['print']} - guessed by {data['guessed_by'].mention}"
         desc += f'{target_type}**     : {guessed_by}\n'
 
-    message = create_message(f"Round {round_info['round_no']} - Scoreboard", desc, discord.Color.dark_gray())
+    message = create_message(f"Round {round_info['round_no']} - Scoreboard", desc, interactions.MaterialColors.GREY)
     return message
 
 def settings_message(settings, updated):
